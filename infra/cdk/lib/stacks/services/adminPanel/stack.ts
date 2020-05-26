@@ -1,9 +1,10 @@
 import * as core from '@aws-cdk/core';
 import {Fn, Stack} from '@aws-cdk/core';
-import {ContainerImage, Secret as EcsSecret} from "@aws-cdk/aws-ecs";
+import {ContainerImage, Protocol, Secret as EcsSecret} from "@aws-cdk/aws-ecs";
 import {PolicyStatement, Role, ServicePrincipal} from "@aws-cdk/aws-iam";
 import {Secret} from "@aws-cdk/aws-secretsmanager";
-import {ApplicationProtocol} from "@aws-cdk/aws-elasticloadbalancingv2";
+import {ApplicationListener} from "@aws-cdk/aws-elasticloadbalancingv2";
+import {PublicHostedZone} from "@aws-cdk/aws-route53";
 
 import {EnvConstructProps} from "../../../types";
 import {ApplicationMultipleTargetGroupsFargateService} from "../../../patterns/applicationMultipleTargetGroupsFargateService";
@@ -12,8 +13,7 @@ import {MainDatabase} from "../../env/main/mainDatabase";
 import {FargateServiceResources} from "../../../patterns/fargateServiceResources";
 import {MigrationsStackProps} from "../migrations/stack";
 import {EnvironmentSettings} from "../../../settings";
-import {PublicHostedZone} from "@aws-cdk/aws-route53";
-import {Certificate} from "@aws-cdk/aws-certificatemanager";
+import {MainECSCluster} from "../../env/main/mainEcsCluster";
 
 
 export interface AdminPanelStackProps extends core.StackProps, EnvConstructProps {
@@ -30,10 +30,15 @@ export class AdminPanelStack extends core.Stack {
         const taskRole = this.createTaskRole(props);
 
         const dbSecretArn = Fn.importValue(MainDatabase.geDatabaseSecretArnOutputExportName(envSettings));
-        const certificate = Certificate.fromCertificateArn(this, "Cert", envSettings.certificateArn);
         const domainZone = PublicHostedZone.fromHostedZoneAttributes(this, "DomainZone", {
             hostedZoneId: envSettings.hostedZone.id,
             zoneName: envSettings.hostedZone.name,
+        });
+
+        const httpsListener = ApplicationListener.fromApplicationListenerAttributes(this, "HttpsListener", {
+            listenerArn: Fn.importValue(
+                MainECSCluster.getLoadBalancerHttpsListenerArnOutputExportName(props.envSettings)),
+            securityGroup: resources.publicLoadBalancerSecurityGroup,
         });
 
         this.fargateService = new ApplicationMultipleTargetGroupsFargateService(this, "AdminPanelService", {
@@ -52,7 +57,7 @@ export class AdminPanelStack extends core.Stack {
                     image: ContainerImage.fromEcrRepository(resources.nginxRepository, envSettings.version),
                     environment: {
                         "NGINX_BACKEND_HOST": "localhost",
-                        "NGINX_SERVER_NAME": resources.publicLoadBalancer.loadBalancerDnsName
+                        "NGINX_SERVER_NAME": envSettings.domains.adminPanel,
                     },
                 },
                 {
@@ -61,8 +66,8 @@ export class AdminPanelStack extends core.Stack {
                     environment: {
                         "CHAMBER_SERVICE_NAME": this.getChamberServiceName(envSettings),
                         "CHAMBER_KMS_KEY_ALIAS": MainKmsKey.getKeyAlias(envSettings),
-                        "DJANGO_ALLOWED_HOSTS": `${resources.publicLoadBalancer.loadBalancerDnsName},`,
-                        "DJANGO_ALLOWED_CIDR_NETS": "10.0.1.0/24"
+                        "DJANGO_ALLOWED_HOSTS": `${envSettings.domains.adminPanel}`,
+                        "DJANGO_ALLOWED_CIDR_NETS": "10.0.1.0/16"
                     },
                     secrets: {
                         "DB_CONNECTION": EcsSecret.fromSecretsManager(
@@ -75,15 +80,11 @@ export class AdminPanelStack extends core.Stack {
                     domainZone,
                     domainName: envSettings.domains.adminPanel,
                     loadBalancer: resources.publicLoadBalancer,
-                    listeners: [
-                        {
-                            name: 'AdminPanelNginxHTTPS',
-                            port: 443,
-                            protocol: ApplicationProtocol.HTTPS,
-                            certificate,
-                        }
-                    ],
+                    listeners: [httpsListener],
                 },
+            ],
+            targetGroups: [
+                {protocol: Protocol.TCP, containerPort: 80, priority: 1, hostHeader: envSettings.domains.adminPanel}
             ],
         });
     }
@@ -129,6 +130,6 @@ export class AdminPanelStack extends core.Stack {
     }
 
     protected getChamberServiceName(envSettings: EnvironmentSettings) {
-        return `${envSettings.projectEnvName}-admin-panel`;
+        return `env-${envSettings.projectEnvName}-admin-panel`;
     }
 }
