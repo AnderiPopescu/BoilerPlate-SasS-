@@ -36,13 +36,13 @@ export class WebappCiConfig extends ServiceCiConfig {
     private createBuildAction(actionProps: Partial<CodeBuildActionProps>, props: WebAppCiConfigProps) {
         return new CodeBuildAction(<CodeBuildActionProps>{
             ...actionProps,
-            actionName: `${props.envSettings.projectName}-build-webapp`,
+            actionName: `${props.envSettings.projectEnvName}-build-webapp`,
         });
     }
 
     private createBuildProject(props: WebAppCiConfigProps) {
         return new Project(this, "WebAppBuildProject", {
-            projectName: `${props.envSettings.projectName}-build-webapp`,
+            projectName: `${props.envSettings.projectEnvName}-build-webapp`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
@@ -68,14 +68,14 @@ export class WebappCiConfig extends ServiceCiConfig {
     private createDeployAction(actionProps: Partial<CodeBuildActionProps>, props: WebAppCiConfigProps) {
         return new CodeBuildAction(<CodeBuildActionProps>{
             ...actionProps,
-            actionName: `${props.envSettings.projectName}-deploy-webapp`,
+            actionName: `${props.envSettings.projectEnvName}-deploy-webapp`,
         });
     }
 
     private createDeployProject(props: WebAppCiConfigProps) {
         const stack = Stack.of(this);
         const project = new Project(this, "WebAppDeployProject", {
-            projectName: `${props.envSettings.projectName}-deploy-webapp`,
+            projectName: `${props.envSettings.projectEnvName}-deploy-webapp`,
             buildSpec: BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
