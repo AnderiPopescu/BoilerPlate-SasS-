@@ -39,6 +39,18 @@ describe('ChangePasswordForm: Component', () => {
     });
   });
 
+  it('should show success message if action completes successfully', async () => {
+    mockDispatch.mockResolvedValue({ isError: false });
+
+    render();
+    userEvent.type(screen.getByPlaceholderText(/old password/gi), formData.oldPassword);
+    userEvent.type(screen.getByPlaceholderText(/new password/gi), formData.newPassword);
+    act(() => userEvent.click(screen.getByRole('button', { name: /change password/gi })));
+    await waitFor(() => {
+      expect(screen.getByText('Password changed successfully')).toBeInTheDocument();
+    });
+  });
+
   it('should show error if required value is missing', async () => {
     render();
     userEvent.type(screen.getByPlaceholderText(/old password/gi), formData.oldPassword);
