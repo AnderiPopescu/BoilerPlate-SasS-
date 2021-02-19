@@ -5,7 +5,7 @@ import { EmailComponentProps } from '../../types';
 import { Td, Tr } from '../../base';
 import { Container } from './accountActivation.styles';
 
-interface AccountActivationProps extends EmailComponentProps {
+export interface AccountActivationProps extends EmailComponentProps {
   userId: string;
   token: string;
 }
