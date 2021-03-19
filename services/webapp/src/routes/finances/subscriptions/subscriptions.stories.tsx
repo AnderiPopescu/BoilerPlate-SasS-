@@ -15,7 +15,7 @@ const Template: Story = (args) => {
 };
 
 export default {
-  title: 'Routes/Subscriptions',
+  title: 'Routes/Subscriptions/Subscription details',
   component: Subscriptions,
   decorators: [withProviders({ store })],
 };
