@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel-plugin for production.
  */
 const documents = {
-    "\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n  }\n": types.CommonQueryCurrentUserFragmentFragmentDoc,
+    "\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n    otpVerified\n    otpEnabled\n  }\n": types.CommonQueryCurrentUserFragmentFragmentDoc,
     "\n  query commonQueryCurrentUserQuery {\n    currentUser {\n      ...commonQueryCurrentUserFragment\n    }\n  }\n": types.CommonQueryCurrentUserQueryDocument,
     "\n  query configContentfulAppConfigQuery {\n    appConfigCollection(limit: 1) {\n      items {\n        name\n        privacyPolicy\n        termsAndConditions\n      }\n    }\n  }\n": types.ConfigContentfulAppConfigQueryDocument,
     "\n  mutation authConfirmUserEmailMutation($input: ConfirmEmailMutationInput!) {\n    confirm(input: $input) {\n      ok\n    }\n  }\n": types.AuthConfirmUserEmailMutationDocument,
@@ -46,10 +46,14 @@ const documents = {
     "\n  fragment subscriptionPlanItemFragment on SubscriptionPlanType {\n    id\n    pk\n    product {\n      id\n      name\n    }\n    amount\n  }\n": types.SubscriptionPlanItemFragmentFragmentDoc,
     "\n  mutation authChangePasswordMutation($input: ChangePasswordMutationInput!) {\n    changePassword(input: $input) {\n      access\n      refresh\n    }\n  }\n": types.AuthChangePasswordMutationDocument,
     "\n  mutation authUpdateUserProfileMutation($input: UpdateCurrentUserMutationInput!) {\n    updateCurrentUser(input: $input) {\n      userProfile {\n        id\n        user {\n          ...commonQueryCurrentUserFragment\n        }\n      }\n    }\n  }\n": types.AuthUpdateUserProfileMutationDocument,
-    "\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n    }\n  }\n": types.LoginFormMutationDocument,
+    "\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n      otpAuthToken\n    }\n  }\n": types.LoginFormMutationDocument,
     "\n  mutation authRequestPasswordResetConfirmMutation($input: PasswordResetConfirmationMutationInput!) {\n    passwordResetConfirm(input: $input) {\n      ok\n    }\n  }\n": types.AuthRequestPasswordResetConfirmMutationDocument,
     "\n  mutation authRequestPasswordResetMutation($input: PasswordResetMutationInput!) {\n    passwordReset(input: $input) {\n      ok\n    }\n  }\n": types.AuthRequestPasswordResetMutationDocument,
     "\n  mutation authSignupMutation($input: SingUpMutationInput!) {\n    signUp(input: $input) {\n      access\n      refresh\n    }\n  }\n": types.AuthSignupMutationDocument,
+    "\n  mutation generateOtp($input: GenerateOTPMutationInput!) {\n    generateOtp(input: $input) {\n      base32\n      otpauthUrl\n    }\n  }\n": types.GenerateOtpDocument,
+    "\n  mutation verifyOtp($input: VerifyOTPMutationInput!) {\n    verifyOtp(input: $input) {\n      otpVerified\n    }\n  }\n": types.VerifyOtpDocument,
+    "\n  mutation validateOtp($input: ValidateOTPMutationInput!) {\n    validateOtp(input: $input) {\n      access\n      refresh\n    }\n  }\n": types.ValidateOtpDocument,
+    "\n  mutation disableOtp($input: DisableOTPMutationInput!) {\n    disableOtp(input: $input) {\n      ok\n    }\n  }\n": types.DisableOtpDocument,
     "\n  fragment stripePaymentIntentFragment on StripePaymentIntentType {\n    id\n    amount\n    clientSecret\n    currency\n    pk\n  }\n": types.StripePaymentIntentFragmentFragmentDoc,
     "\n  mutation stripeCreatePaymentIntentMutation_($input: CreatePaymentIntentMutationInput!) {\n    createPaymentIntent(input: $input) {\n      paymentIntent {\n        ...stripePaymentIntentFragment\n        id\n      }\n    }\n  }\n": types.StripeCreatePaymentIntentMutation_Document,
     "\n  mutation stripeUpdatePaymentIntentMutation_($input: UpdatePaymentIntentMutationInput!) {\n    updatePaymentIntent(input: $input) {\n      paymentIntent {\n        ...stripePaymentIntentFragment\n        id\n      }\n    }\n  }\n": types.StripeUpdatePaymentIntentMutation_Document,
@@ -86,7 +90,7 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n  }\n"): (typeof documents)["\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n  }\n"];
+export function gql(source: "\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n    otpVerified\n    otpEnabled\n  }\n"): (typeof documents)["\n  fragment commonQueryCurrentUserFragment on CurrentUserType {\n    id\n    email\n    firstName\n    lastName\n    roles\n    avatar\n    otpVerified\n    otpEnabled\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -218,7 +222,7 @@ export function gql(source: "\n  mutation authUpdateUserProfileMutation($input: 
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n    }\n  }\n"): (typeof documents)["\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n    }\n  }\n"];
+export function gql(source: "\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n      otpAuthToken\n    }\n  }\n"): (typeof documents)["\n  mutation loginFormMutation($input: ObtainTokenMutationInput!) {\n    tokenAuth(input: $input) {\n      access\n      refresh\n      otpAuthToken\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -231,6 +235,22 @@ export function gql(source: "\n  mutation authRequestPasswordResetMutation($inpu
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation authSignupMutation($input: SingUpMutationInput!) {\n    signUp(input: $input) {\n      access\n      refresh\n    }\n  }\n"): (typeof documents)["\n  mutation authSignupMutation($input: SingUpMutationInput!) {\n    signUp(input: $input) {\n      access\n      refresh\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation generateOtp($input: GenerateOTPMutationInput!) {\n    generateOtp(input: $input) {\n      base32\n      otpauthUrl\n    }\n  }\n"): (typeof documents)["\n  mutation generateOtp($input: GenerateOTPMutationInput!) {\n    generateOtp(input: $input) {\n      base32\n      otpauthUrl\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation verifyOtp($input: VerifyOTPMutationInput!) {\n    verifyOtp(input: $input) {\n      otpVerified\n    }\n  }\n"): (typeof documents)["\n  mutation verifyOtp($input: VerifyOTPMutationInput!) {\n    verifyOtp(input: $input) {\n      otpVerified\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation validateOtp($input: ValidateOTPMutationInput!) {\n    validateOtp(input: $input) {\n      access\n      refresh\n    }\n  }\n"): (typeof documents)["\n  mutation validateOtp($input: ValidateOTPMutationInput!) {\n    validateOtp(input: $input) {\n      access\n      refresh\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation disableOtp($input: DisableOTPMutationInput!) {\n    disableOtp(input: $input) {\n      ok\n    }\n  }\n"): (typeof documents)["\n  mutation disableOtp($input: DisableOTPMutationInput!) {\n    disableOtp(input: $input) {\n      ok\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
